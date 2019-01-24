@@ -44,7 +44,7 @@ public class MyPanel extends JPanel implements KeyListener {
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 1, 1, 3, 1, 1, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -64,13 +64,16 @@ public class MyPanel extends JPanel implements KeyListener {
     //角色坐标
     private int x;
     private int y;
+    //物品坐标
+    private int itemx;
+    private int itemy;
     //增加计步器
     private int count;
     //此处我们添加一组常数，用以区别左右上下按键的触发
-    private static final int LEFT = 0;
-    private static final int RIGHT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
+    private static final int LEFT = 1;
+    private static final int RIGHT = 2;
+    private static final int UP = 3;
+    private static final int DOWN = 0;
     //用以确认角色所对方向,对应按键触发
     private int direction;
     private Thread threadAnime;
@@ -83,6 +86,9 @@ public class MyPanel extends JPanel implements KeyListener {
         //初始化角色位置
         x = 8;
         y = 8;
+        //初始化item位置
+        itemx=7;
+        itemy=7;
         //默认角色向下
         direction = DOWN;
         //在面板构建时赋予计步器初值
@@ -110,12 +116,13 @@ public class MyPanel extends JPanel implements KeyListener {
         //如果换成drawImage函数就能在指定位置加载一张图片。
         //g.drawString("fxxk 挖局", 40, 40);
         drawRole(g);
+        drawItem(g);
     }
 
     //载入图像
     private void loadImage() {
         //获得当前类对应的相对位置image文件夹下的地板图像[以下图像可用任意素材代替]
-        ImageIcon icon = new ImageIcon(getClass().getResource("image/floor3.png"));
+        ImageIcon icon = new ImageIcon(getClass().getResource("image/floor.png"));
         //将地板图像实例付与floorImage
         floorImage = icon.getImage();
         //获得当前类对应的相对位置image文件夹下的墙体图像
@@ -133,7 +140,13 @@ public class MyPanel extends JPanel implements KeyListener {
 
     private void drawRole(Graphics g) {
         g.drawImage(roleImage, x * CS, y * CS, x * CS + CS, y * CS + CS,
-                count * 2*CS, 0, count * 2*CS + CS, CS, this);
+                count * 2 * CS, direction * CS, count * 2 * CS + CS, direction * CS + CS,
+                this);
+    }
+
+    private void drawItem(Graphics g) {
+        g.drawImage(item, itemx * CS, itemy * CS, itemx * CS + CS, itemy * CS + CS,
+                CS, CS, CS + CS, CS + CS, this);
     }
 
     private void drawMap(Graphics g) {
@@ -144,16 +157,20 @@ public class MyPanel extends JPanel implements KeyListener {
                 // 执行；switch函数将持续运算到最后一个case为止。
                 switch (map[x][y]) {
                     case 0://map标记为0时画出地板
-                        g.drawImage(floorImage, y * CS, x * CS, this);
+                        g.drawImage(floorImage, y * CS, x * CS, y * CS + CS, x * CS + CS,
+                                0, 2 * CS, CS, 2 * CS + CS, this);
                         break;
                     case 1:
-                        g.drawImage(wallImage, y * CS, x * CS, this);
+                        g.drawImage(wallImage, y * CS, x * CS, y * CS + CS, x * CS + CS,
+                                0, 0, CS, CS, this);
                         break;
                     case 2:
-                        g.drawImage(item, y * CS, x * CS, this);
+                        g.drawImage(item, y * CS, x * CS, y * CS + CS, x * CS + CS,
+                                CS, CS, CS + CS, CS + CS, this);
                         break;
                     case 3:
-                        g.drawImage(door, y * CS, x * CS, this);
+                        g.drawImage(door, y * CS, x * CS, y * CS + CS, x * CS + CS,
+                                0, 0, CS, CS, this);
                         break;
                     default:
                         break;
@@ -256,21 +273,25 @@ public class MyPanel extends JPanel implements KeyListener {
                 if (isAllow(x - 1, y)) {
                     x--;
                 }
+                direction = LEFT;
                 break;
             case RIGHT:
                 if (isAllow(x + 1, y)) {
                     x++;
                 }
+                direction = RIGHT;
                 break;
             case UP:
                 if (isAllow(x, y - 1)) {
                     y--;
                 }
+                direction = UP;
                 break;
             case DOWN:
                 if (isAllow(x, y + 1)) {
                     y++;
                 }
+                direction = DOWN;
                 break;
             default:
                 break;
